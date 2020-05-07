@@ -112,14 +112,16 @@ class HashTable:
                 else:
                     return None
 
-    def resize(self, new_size):
+    def resize(self, new_size=None):
         """
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
 
         Implement this.
         """
-        new = HashTable(capacity=new_size)
+        if new_size == None:
+            new_size = self.capacity * 2
+        new = HashTable(capacity=max(new_size, 8))
         for node in self.storage:
             if node is None:
                 pass
