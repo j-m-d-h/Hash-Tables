@@ -16,6 +16,10 @@ class HashTable:
 
     Implement this.
     """
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.size = 0
+        self.storage = self.capacity * [None]
 
     def fnv1(self, key):
         """
@@ -27,9 +31,11 @@ class HashTable:
     def djb2(self, key):
         """
         DJB2 32-bit hash function
-
-        Implement this, and/or FNV-1.
         """
+        hash = 5381
+        for e in key:
+            hash = (hash * 33) + ord(e)
+        return hash
 
     def hash_index(self, key):
         """
@@ -47,6 +53,24 @@ class HashTable:
 
         Implement this.
         """
+        self.size += 1
+        if self.size >= self.capacity * 0.7:
+            self.resize(self.capacity * 2)
+        index = self.hash_index(key)
+        node = self.storage[index]
+        if node is None:
+            self.storage[index] = HashTableEntry(key, value)
+        else:
+            while True:
+                if node.key == key:
+                    node.value = value
+                    return
+                elif node.next is None:
+                    node.next = HashTableEntry(key, value)
+                    return
+                else:
+                    node = node.next
+
 
     def delete(self, key):
         """
@@ -56,6 +80,16 @@ class HashTable:
 
         Implement this.
         """
+        index = self.hash_index(key)
+        node = self.storage[index]
+        if node is not None:
+            self.storage[index] = None
+            self.size -= 1
+            if self.size <= self.capacity * 0.2:
+                self.resize(self.capacity // 2)
+            return node
+        else:
+            print('Key not found.')
 
     def get(self, key):
         """
@@ -65,14 +99,39 @@ class HashTable:
 
         Implement this.
         """
+        index = self.hash_index(key)
+        node = self.storage[index]
+        if node is None:
+            return None
+        else:
+            while True:
+                if node.key == key:
+                    return node.value
+                elif node.next is not None:
+                    node = node.next
+                else:
+                    return None
 
-    def resize(self):
+    def resize(self, new_size):
         """
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
 
         Implement this.
         """
+        new = HashTable(capacity=new_size)
+        for node in self.storage:
+            if node is None:
+                pass
+            else:
+                new.put(node.key, node.value)
+                while node.next is not None:
+                    node = node.next
+                    new.put(node.key, node.value)
+        self.capacity = new_size
+        self.storage = new.storage
+
+
 
 if __name__ == "__main__":
     ht = HashTable(2)
